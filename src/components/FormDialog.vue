@@ -2,18 +2,20 @@
  * @Author: qyp
  * @Date: 2026-06-21 23:04:15
  * @LastEditors: qyp
- * @LastEditTime: 2026-06-21 23:26:59
+ * @LastEditTime: 2026-06-26 20:14:29
  * @Description: 
 -->
 <script setup lang="ts">
 // 通用表单弹窗封装，理解配置驱动表单的思路
 import { ref, watch } from 'vue'
+import ImageUpload from '@/components/ImageUpload.vue'
+
 
 // 表单字段配置类型
 export interface FormField {
   label: string
   key: string
-  type: 'text' | 'password' | 'email' | 'select' | 'number'
+  type: 'text' | 'password' | 'email' | 'select' | 'number' |'upload'
   placeholder?: string
   options?: { label: string; value: string }[]
   disabled?: boolean
@@ -65,7 +67,7 @@ const handleSubmit = () => {
 
 <template>
   <!--  弹窗 UI 模板 -->
-  <div v-if="modelValue" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+   <div v-if="modelValue" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
     <div style="background: white; padding: 24px; border-radius: 8px; width: 450px;">
       <h3>{{ title }}</h3>
 
@@ -75,8 +77,9 @@ const handleSubmit = () => {
           <span v-if="field.required" style="color: red;">*</span>
         </label>
 
+        <!-- 文本类输入框 -->
         <input
-          v-if="field.type !== 'select'"
+          v-if="field.type === 'text' || field.type === 'password' || field.type === 'email' || field.type === 'number'"
           v-model="formData[field.key]"
           :type="field.type"
           :placeholder="field.placeholder"
@@ -84,8 +87,9 @@ const handleSubmit = () => {
           style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; margin-top: 4px;"
         />
 
+        <!-- 下拉框 -->
         <select
-          v-else
+          v-else-if="field.type === 'select'"
           v-model="formData[field.key]"
           style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; margin-top: 4px;"
         >
@@ -94,6 +98,12 @@ const handleSubmit = () => {
             {{ opt.label }}
           </option>
         </select>
+
+        <!-- 图片上传 -->
+        <ImageUpload
+          v-else-if="field.type === 'upload'"
+          v-model="formData[field.key]"
+        />
       </div>
 
       <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px;">

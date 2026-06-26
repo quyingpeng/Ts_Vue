@@ -2,7 +2,7 @@
  * @Author: qyp
  * @Date: 2026-06-10 16:48:21
  * @LastEditors: qyp
- * @LastEditTime: 2026-06-21 22:58:18
+ * @LastEditTime: 2026-06-26 20:04:26
  * @Description: 
  */
 import { createApp } from 'vue'
@@ -12,6 +12,9 @@ import { setupDirectives } from './directives'
 
 import App from './App.vue'
 import router from './router'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -20,6 +23,7 @@ pinia.use(piniaPluginPersistedstate)
 app.use(pinia)
 app.use(createPinia())
 app.use(router)
+app.use(ElementPlus)
 // 在 app.mount 之前加这行
 setupDirectives(app)
 

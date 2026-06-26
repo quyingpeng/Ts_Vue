@@ -2,7 +2,7 @@
  * @Author: qyp
  * @Date: 2026-06-15 11:16:57
  * @LastEditors: qyp
- * @LastEditTime: 2026-06-16 15:36:39
+ * @LastEditTime: 2026-06-26 20:17:05
  * @Description: 
  */
 import { defineStore } from 'pinia'
@@ -12,7 +12,11 @@ interface User {
   id: number
   username: string
   nickname: string
+  email: string
   role: 'admin' | 'editor' | 'viewer'
+  status: 'active' | 'disabled'
+  createdAt: string
+  avatar: string  // 
 }
 
 export const useUserStore = defineStore('user', () => {
