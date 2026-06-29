@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed,watch } from 'vue'
 import { Delete, Edit } from '@element-plus/icons-vue'
+import { useDebounce } from '@/composables/useDebounce'
 import FormDialog, { type FormField } from '@/components/FormDialog.vue'
 
 interface User {
@@ -21,9 +22,11 @@ const mockUsers: User[] = [
   { id: 5, username: 'lisi', nickname: '李四', email: 'lisi@test.com', role: 'viewer', status: 'active', createdAt: '2024-05-05' },
 ]
 
+const filteredUsers = ref<User[]>([])
 const users = ref<User[]>([])
 const loading = ref(false)
 const keyword = ref('')
+const debouncedKeyword = useDebounce(keyword,500)
 const dialogVisible = ref(false)
 const editingUser = ref<User | null>(null)
 const currentPage = ref(1)
@@ -49,15 +52,21 @@ const fetchUsers = async () => {
   loading.value = true
   await new Promise(resolve => setTimeout(resolve, 300))
   let list = [...mockUsers]
-  if (keyword.value) {
+  if (debouncedKeyword.value) {
     list = list.filter(u =>
-      u.username.includes(keyword.value) || u.nickname.includes(keyword.value)
+      u.username.includes(debouncedKeyword.value) || u.nickname.includes(debouncedKeyword.value)
     )
   }
-  users.value = list
+  filteredUsers.value = list
+  currentPage.value = 1 //搜索时重置
   loading.value = false
 }
 
+const pagedUsers = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredUsers.value.slice(start, end)
+})
 const handleCreate = () => {
   editingUser.value = null
   dialogVisible.value = true
@@ -92,6 +101,13 @@ const handleToggleStatus = (user: User) => {
   user.status = user.status === 'active' ? 'disabled' : 'active'
 }
 
+watch(pageSize, () => {
+  console.log('切换分页参数')
+  currentPage.value = 1
+})
+watch(debouncedKeyword,()=>{
+  fetchUsers()
+})
 onMounted(() => fetchUsers())
 </script>
 
@@ -100,13 +116,13 @@ onMounted(() => fetchUsers())
     <h2>👥 用户管理</h2>
 
     <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-      <el-input v-model="keyword" placeholder="搜索用户名或昵称" style="width: 260px;" clearable @input="fetchUsers" />
+      <el-input v-model="keyword" placeholder="搜索用户名或昵称" style="width: 260px;" clearable />
       <el-button type="primary" v-permission="'admin'" @click="handleCreate">
         + 新增用户
       </el-button>
     </div>
 
-    <el-table :data="users" border stripe v-loading="loading" style="width: 100%;">
+    <el-table :data="pagedUsers" border stripe v-loading="loading" style="width: 100%;">
       <el-table-column label="头像" width="70">
         <template #default="{ row }">
           <img v-if="row.avatar" :src="row.avatar"
@@ -144,7 +160,7 @@ onMounted(() => fetchUsers())
 
     <div style="display: flex; justify-content: center; margin-top: 16px;">
       <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 20]"
-        :total="users.length" layout="total, sizes, prev, pager, next" />
+        :total="filteredUsers.length" layout="total, sizes, prev, pager, next" />
     </div>
 
     <FormDialog v-model="dialogVisible" :title="editingUser ? '编辑用户' : '新增用户'"

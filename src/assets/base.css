@@ -1,0 +1,20 @@
+:root {
+  --bg-color: #f0f2f5;
+  --text-color: #333;
+  --card-bg: #fff;
+  --border-color: #e0e0e0;
+  --sidebar-bg: #304156;
+}
+
+html.dark {
+  --bg-color: #1a1a2e;
+  --text-color: #e0e0e0;
+  --card-bg: #16213e;
+  --border-color: #2a2a4a;
+  --sidebar-bg: #0f0f23;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}

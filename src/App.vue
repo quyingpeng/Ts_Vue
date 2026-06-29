@@ -2,7 +2,7 @@
  * @Author: qyp
  * @Date: 2026-06-10 16:48:21
  * @LastEditors: qyp
- * @LastEditTime: 2026-06-25 21:29:36
+ * @LastEditTime: 2026-06-28 18:30:09
  * @Description: 
 -->
 <script setup lang="ts">
@@ -21,8 +21,17 @@ import AiChat from '@/components/AiChat.vue'
 
     <!-- 路由出口：匹配到的页面显示在这里 -->
     <RouterView />
-     <AiChat />
+    <AiChat />
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+html.dark .el-table {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+}
+
+html.dark .el-table th {
+  background-color: var(--sidebar-bg);
+}
+</style>
