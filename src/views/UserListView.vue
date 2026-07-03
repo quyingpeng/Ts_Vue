@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed,watch } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { Delete, Edit } from '@element-plus/icons-vue'
 import { useDebounce } from '@/composables/useDebounce'
 import FormDialog, { type FormField } from '@/components/FormDialog.vue'
@@ -16,19 +16,10 @@ interface User {
   createdAt: string
 }
 
-const mockUsers: User[] = [
-  { id: 1, username: 'admin', nickname: '管理员', email: 'admin@test.com', role: 'admin', status: 'active', createdAt: '2024-01-01', avatar: '' },
-  { id: 2, username: 'editor1', nickname: '编辑小王', email: 'editor@test.com', role: 'editor', status: 'active', createdAt: '2024-02-15', avatar: '' },
-  { id: 3, username: 'viewer1', nickname: '访客小李', email: 'viewer@test.com', role: 'viewer', status: 'disabled', createdAt: '2024-03-20' },
-  { id: 4, username: 'zhangsan', nickname: '张三', email: 'zhangsan@test.com', role: 'editor', status: 'active', createdAt: '2024-04-10' },
-  { id: 5, username: 'lisi', nickname: '李四', email: 'lisi@test.com', role: 'viewer', status: 'active', createdAt: '2024-05-05' },
-]
-
-const filteredUsers = ref<User[]>([])
 const users = ref<User[]>([])
 const loading = ref(false)
 const keyword = ref('')
-const debouncedKeyword = useDebounce(keyword,500)
+const debouncedKeyword = useDebounce(keyword, 500)
 const dialogVisible = ref(false)
 const editingUser = ref<User | null>(null)
 const currentPage = ref(1)
@@ -53,23 +44,23 @@ const formFields: FormField[] = [
 
 const fetchUsers = async () => {
   loading.value = true
-  const data: any = await request.get('/users', {
-    params: {
-      page: currentPage.value,
-      pageSize: pageSize.value,
-      keyword: debouncedKeyword.value
-    }
-  })
-  filteredUsers.value = data.list
-  total.value = data.total
-  loading.value = false
+  try {
+    const data: any = await request.get('/users', {
+      params: {
+        page: currentPage.value,
+        pageSize: pageSize.value,
+        keyword: debouncedKeyword.value
+      }
+    })
+    users.value = data.list
+    total.value = data.total
+  } catch (err) {
+    console.error('获取用户列表失败', err)
+  } finally {
+    loading.value = false
+  }
 }
 
-const pagedUsers = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return filteredUsers.value.slice(start, end)
-})
 const handleCreate = () => {
   editingUser.value = null
   dialogVisible.value = true
@@ -80,35 +71,44 @@ const handleEdit = (user: User) => {
   dialogVisible.value = true
 }
 
-const handleFormSubmit = (data: Record<string, any>) => {
-  if (editingUser.value) {
-    const idx = users.value.findIndex(u => u.id === editingUser.value!.id)
-    if (idx > -1) users.value[idx] = { ...users.value[idx], ...data }
-  } else {
-    users.value.unshift({
-      id: Date.now(),
-      ...data,
-      status: 'active',
-      createdAt: new Date().toISOString()
-    } as User)
+const handleFormSubmit = async (data: Record<string, any>) => {
+  try {
+    if (editingUser.value) {
+      await request.put(`/users/${editingUser.value.id}`, data)
+    } else {
+      await request.post('/users', data)
+    }
+    dialogVisible.value = false
+    fetchUsers()  // 刷新列表
+  } catch (err: any) {
+    alert(err.message || '操作失败')
   }
-  dialogVisible.value = false
 }
 
 const handleDelete = async (user: User) => {
   if (!confirm(`确定删除"${user.nickname}"？`)) return
-  users.value = users.value.filter(u => u.id !== user.id)
+  try {
+    await request.delete(`/users/${user.id}`)
+    fetchUsers()
+  } catch (err: any) {
+    alert(err.message || '删除失败')
+  }
 }
 
-const handleToggleStatus = (user: User) => {
-  user.status = user.status === 'active' ? 'disabled' : 'active'
+const handleToggleStatus = async (user: User) => {
+  const newStatus = user.status === 'active' ? 'disabled' : 'active'
+  try {
+    await request.put(`/users/${user.id}`, { status: newStatus })
+    user.status = newStatus  // 前端直接更新显示，不用重新请求
+  } catch (err: any) {
+    alert(err.message || '操作失败')
+  }
 }
-
-watch(pageSize, () => {
-  console.log('切换分页参数')
-  currentPage.value = 1
-})
-watch(debouncedKeyword,()=>{
+const handleSizeChange = () => {
+  currentPage.value = 1  // 修改每页条数时回到第一页
+  fetchUsers()
+}
+watch(debouncedKeyword, () => {
   fetchUsers()
 })
 onMounted(() => fetchUsers())
@@ -125,7 +125,7 @@ onMounted(() => fetchUsers())
       </el-button>
     </div>
 
-    <el-table :data="pagedUsers" border stripe v-loading="loading" style="width: 100%;">
+    <el-table :data="users" border stripe v-loading="loading" style="width: 100%;">
       <el-table-column label="头像" width="70">
         <template #default="{ row }">
           <img v-if="row.avatar" :src="row.avatar"
@@ -162,8 +162,9 @@ onMounted(() => fetchUsers())
     </el-table>
 
     <div style="display: flex; justify-content: center; margin-top: 16px;">
-      <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 20]"
-        :total="total" layout="total, sizes, prev, pager, next" />
+      <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[1, 10, 20]"
+        :total="total" layout="total, sizes, prev, pager, next" @current-change="fetchUsers"
+        @size-change="handleSizeChange" />
     </div>
 
     <FormDialog v-model="dialogVisible" :title="editingUser ? '编辑用户' : '新增用户'"

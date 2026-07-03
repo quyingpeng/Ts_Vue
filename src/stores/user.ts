@@ -2,7 +2,7 @@
  * @Author: qyp
  * @Date: 2026-06-15 11:16:57
  * @LastEditors: qyp
- * @LastEditTime: 2026-07-03 20:31:55
+ * @LastEditTime: 2026-07-03 23:14:02
  * @Description: 
  */
 import { defineStore } from 'pinia'
@@ -21,7 +21,8 @@ interface User {
 }
 
 export const useUserStore = defineStore('user', () => {
-  const user = ref<User | null>(null)
+  const savedUser = localStorage.getItem('user')
+  const user = ref<User | null>(savedUser ? JSON.parse(savedUser) : null)
   const token = ref<string>(localStorage.getItem('token') || '')
   const isLoggedIn = computed(() => !!token.value)
   const userName = computed(() => user.value?.nickname || '')
@@ -30,6 +31,7 @@ export const useUserStore = defineStore('user', () => {
     const data: any = await request.post('/auth/login', { username, password })
     token.value = data.token
     user.value = data.user
+    localStorage.setItem('user', JSON.stringify(data.user))
     localStorage.setItem('token', data.token)
   }
 
@@ -37,7 +39,10 @@ export const useUserStore = defineStore('user', () => {
     token.value = '';
     user.value = null
     localStorage.removeItem('token')
+    localStorage.removeItem('user') 
   }
 
   return { user, token, isLoggedIn, userName, login, logout }
+},{
+  persist: true  
 })
