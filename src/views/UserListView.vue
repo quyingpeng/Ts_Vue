@@ -3,6 +3,8 @@ import { ref, onMounted, computed,watch } from 'vue'
 import { Delete, Edit } from '@element-plus/icons-vue'
 import { useDebounce } from '@/composables/useDebounce'
 import FormDialog, { type FormField } from '@/components/FormDialog.vue'
+import request from '@/utils/request'
+
 
 interface User {
   id: number
@@ -31,6 +33,7 @@ const dialogVisible = ref(false)
 const editingUser = ref<User | null>(null)
 const currentPage = ref(1)
 const pageSize = ref(10)
+const total = ref(0)
 
 const formFields: FormField[] = [
   { label: '头像', key: 'avatar', type: 'upload' },  // ← 新增
@@ -50,15 +53,15 @@ const formFields: FormField[] = [
 
 const fetchUsers = async () => {
   loading.value = true
-  await new Promise(resolve => setTimeout(resolve, 300))
-  let list = [...mockUsers]
-  if (debouncedKeyword.value) {
-    list = list.filter(u =>
-      u.username.includes(debouncedKeyword.value) || u.nickname.includes(debouncedKeyword.value)
-    )
-  }
-  filteredUsers.value = list
-  currentPage.value = 1 //搜索时重置
+  const data: any = await request.get('/users', {
+    params: {
+      page: currentPage.value,
+      pageSize: pageSize.value,
+      keyword: debouncedKeyword.value
+    }
+  })
+  filteredUsers.value = data.list
+  total.value = data.total
   loading.value = false
 }
 
@@ -160,7 +163,7 @@ onMounted(() => fetchUsers())
 
     <div style="display: flex; justify-content: center; margin-top: 16px;">
       <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[5, 10, 20]"
-        :total="filteredUsers.length" layout="total, sizes, prev, pager, next" />
+        :total="total" layout="total, sizes, prev, pager, next" />
     </div>
 
     <FormDialog v-model="dialogVisible" :title="editingUser ? '编辑用户' : '新增用户'"
