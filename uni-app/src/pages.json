@@ -7,10 +7,12 @@
       }
     },
     {
-      "path": "pages/users/users",
-      "style": {
-        "navigationBarTitleText": "用户列表"
-      }
+      "path": "pages/list/list",
+      "style": { "navigationBarTitleText": "用户列表" }
+    },
+    {
+      "path": "pages/user/user",
+      "style": { "navigationBarTitleText": "用户详情" }
     }
   ],
   "easycom": {
