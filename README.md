@@ -2,7 +2,7 @@
  * @Author: qyp
  * @Date: 2026-06-10 16:48:21
  * @LastEditors: qyp
- * @LastEditTime: 2026-07-11 22:34:00
+ * @LastEditTime: 2026-07-12 14:57:47
  * @Description: 
 -->
 # 全栈后台管理系统 + AI 助手 + 多端应用
@@ -12,7 +12,7 @@
 ---
 
 ## 项目结构
-
+```text
 my-app/
 ├── src/ # Vue3 后台管理系统前端
 │ ├── api/ # API 接口封装（含 AI 流式调用）
@@ -62,6 +62,7 @@ my-app/
 ├── package.json
 └── README.md
 
+```
 ---
 
 ## 技术栈
@@ -87,35 +88,53 @@ my-app/
 ## 快速开始
 
 ### 1. 环境要求
-
+```
 - Node.js >= 18
 - npm >= 9
 - Git
+```
 
 ### 2. 克隆项目
 
 ```bash
 git clone <你的仓库地址>
-cd my-app
+cd my-app 
+```
+
 ### 3. 配置环境变量
+
 在项目根目录创建 .env.local：
+
+```typescript
 VITE_API_BASE_URL=http://localhost:3000/api
 VITE_DEEPSEEK_API_KEY=你的API_Key
 VITE_DEEPSEEK_BASE_URL=https://api.deepseek.com
-4. 启动后端（终端1）
+```
+
+### 4. 启动后端（终端1）
+```bash
 cd server
 npm install
 npm run dev
-# 后端运行在 http://localhost:3000
+```
+
+# 后端运行在 <http://localhost:3000>
+
 # 首次运行自动创建数据库，默认管理员：admin / admin123
-5. 启动前端（终端2）
-bash
+
+### 5. 启动前端（终端2）
+
+```bash
+
 # 回到项目根目录
 npm install
 npm run dev
 # 前端运行在 http://localhost:5173
-6. 启动 uni-app（终端3，可选）
-bash
+```
+
+### 6. 启动 uni-app（终端3，可选）
+
+```bash
 cd uni-app
 npm install
 
@@ -124,3 +143,4 @@ npm run dev:h5
 
 # 微信小程序（需安装微信开发者工具）
 npm run dev:mp-weixin
+```
