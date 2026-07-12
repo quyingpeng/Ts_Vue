@@ -2,7 +2,7 @@
  * @Author: qyp
  * @Date: 2026-06-10 16:48:21
  * @LastEditors: qyp
- * @LastEditTime: 2026-07-12 14:57:47
+ * @LastEditTime: 2026-07-12 15:05:00
  * @Description: 
 -->
 # 全栈后台管理系统 + AI 助手 + 多端应用
@@ -14,7 +14,7 @@
 ## 项目结构
 ```text
 my-app/
-├── src/ # Vue3 后台管理系统前端
+├── <span style="color:#e6a23c"> ** src/ # Vue3 后台管理系统前端 **</span>
 │ ├── api/ # API 接口封装（含 AI 流式调用）
 │ ├── components/ # 通用组件
 │ │ ├── FormDialog.vue # 配置驱动表单弹窗
@@ -45,13 +45,13 @@ my-app/
 │ ├── LoginView.vue # 登录页
 │ ├── DashboardView.vue # 仪表盘
 │ └── UserListView.vue # 用户管理
-├── server/ # Node.js + Express 后端
+├── <span style="color:#67c23a"> **server/ # Node.js + Express 后端**</span>
 │ ├── src/
 │ │ ├── db.ts # SQLite 数据库初始化
 │ │ └── index.ts # 接口服务（登录、用户 CRUD）
 │ ├── package.json
 │ └── tsconfig.json
-├── uni-app/ # uni-app 多端应用
+├──<span style="color:#409eff"> **uni-app/ # uni-app 多端应用**</span>
 │ ├── pages/
 │ │ ├── index/index.vue # 登录页
 │ │ ├── list/list.vue # 用户列表
